@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import get_db
 from app.models import User, PatientProfile, FoodAllergy
@@ -118,7 +119,7 @@ async def update_profile(payload: ProfileUpdateRequest, request: Request, db: Se
 
     except HTTPException:
         raise
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.error(f"Error updating profile: {e}")
         db.rollback()
         return JSONResponse(status_code=500, content={"error": "Failed to update profile"})
@@ -159,7 +160,7 @@ async def update_medical(payload: MedicalUpdateRequest, request: Request, db: Se
         db.commit()
         return {"message": "Medical information updated successfully"}
 
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.error(f"Error updating medical info: {e}")
         db.rollback()
         return JSONResponse(status_code=500, content={"error": "Failed to update medical info"})
@@ -194,7 +195,7 @@ async def add_allergy(payload: AllergyCreateRequest, request: Request, db: Sessi
             },
         }
 
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.error(f"Error adding allergy: {e}")
         db.rollback()
         return JSONResponse(status_code=500, content={"error": "Failed to add allergy"})
@@ -218,7 +219,7 @@ async def delete_allergy(allergy_id: str, request: Request, db: Session = Depend
         db.delete(allergy)
         db.commit()
         return {"message": "Allergy removed successfully."}
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.error(f"Error deleting allergy: {e}")
         db.rollback()
         return JSONResponse(status_code=500, content={"error": "Failed to remove allergy."})
