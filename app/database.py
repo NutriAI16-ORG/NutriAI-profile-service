@@ -4,6 +4,7 @@ Profile Service - Database Configuration
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 from app.config import get_settings
 
 settings = get_settings()
@@ -23,5 +24,5 @@ def check_db_health() -> bool:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return True
-    except Exception:
+    except SQLAlchemyError:
         return False
