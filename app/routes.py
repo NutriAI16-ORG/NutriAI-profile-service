@@ -9,8 +9,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from database import get_db
-from models import User, PatientProfile, FoodAllergy
+from app.database import get_db
+from app.models import User, PatientProfile, FoodAllergy
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/profile", tags=["Profile"])
