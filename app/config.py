@@ -6,7 +6,7 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     APP_NAME: str = "NutriAI Profile Service"
-    DATABASE_URL: str = "sqlite:///./test.db"
+    DATABASE_URL: str = "postgresql://nutriai_user@localhost:5432/nutriai"
     APPLICATIONINSIGHTS_CONNECTION_STRING: str = ""
     class Config:
         env_file = ".env"
