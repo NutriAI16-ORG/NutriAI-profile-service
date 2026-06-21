@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Create a non-root user and group
+# Create a non-root user and group..
 RUN groupadd -g 1000 appgroup && useradd -u 1000 -g appgroup -s /bin/sh appuser
 
 WORKDIR /app
