@@ -2,6 +2,7 @@
 Profile Service - API Routes
 """
 import logging
+import uuid
 from typing import Optional, List, Any, Union
 
 from fastapi import APIRouter, Depends, Request, HTTPException
@@ -40,9 +41,13 @@ class AllergyCreateRequest(BaseModel):
 
 @router.get("")
 async def get_profile(request: Request, db: Session = Depends(get_db)):
-    user_id = request.headers.get("X-User-ID")
-    if not user_id:
+    user_id_str = request.headers.get("X-User-ID")
+    if not user_id_str:
         raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -85,9 +90,13 @@ async def get_profile(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/update")
 async def update_profile(payload: ProfileUpdateRequest, request: Request, db: Session = Depends(get_db)):
-    user_id = request.headers.get("X-User-ID")
-    if not user_id:
+    user_id_str = request.headers.get("X-User-ID")
+    if not user_id_str:
         raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
 
     try:
         user = db.query(User).filter(User.id == user_id).first()
@@ -127,9 +136,13 @@ async def update_profile(payload: ProfileUpdateRequest, request: Request, db: Se
 
 @router.post("/medical")
 async def update_medical(payload: MedicalUpdateRequest, request: Request, db: Session = Depends(get_db)):
-    user_id = request.headers.get("X-User-ID")
-    if not user_id:
+    user_id_str = request.headers.get("X-User-ID")
+    if not user_id_str:
         raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
 
     try:
         # Normalize medical_conditions into {conditions: [...], other: "..."} format
@@ -168,9 +181,13 @@ async def update_medical(payload: MedicalUpdateRequest, request: Request, db: Se
 
 @router.post("/allergy")
 async def add_allergy(payload: AllergyCreateRequest, request: Request, db: Session = Depends(get_db)):
-    user_id = request.headers.get("X-User-ID")
-    if not user_id:
+    user_id_str = request.headers.get("X-User-ID")
+    if not user_id_str:
         raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
 
     try:
         if payload.severity not in ("mild", "moderate", "severe"):
@@ -203,12 +220,21 @@ async def add_allergy(payload: AllergyCreateRequest, request: Request, db: Sessi
 
 @router.delete("/allergy/{allergy_id}")
 async def delete_allergy(allergy_id: str, request: Request, db: Session = Depends(get_db)):
-    user_id = request.headers.get("X-User-ID")
-    if not user_id:
+    user_id_str = request.headers.get("X-User-ID")
+    if not user_id_str:
         raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    try:
+        allergy_uuid = uuid.UUID(allergy_id)
+    except ValueError:
+        return JSONResponse(status_code=400, content={"error": "Invalid allergy ID format"})
 
     allergy = db.query(FoodAllergy).filter(
-        FoodAllergy.id == allergy_id,
+        FoodAllergy.id == allergy_uuid,
         FoodAllergy.user_id == user_id,
     ).first()
 
